@@ -1,0 +1,48 @@
+
+services:
+  redis:
+    image: 'redislabs/redismod'
+    ports:
+      - '6379:6379'
+  mysql:
+    image: 'mysql:5.7'
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+  web1:
+    restart: on-failure
+    build: ./web
+    hostname: web1
+    ports:
+      - '81:5000'
+    depends_on:
+      - redis
+      - mysql
+  web2:
+    restart: on-failure
+    build: ./web
+    hostname: web2
+    ports:
+      - '82:5000'
+    depends_on:
+      - redis
+      - mysql
+  nginx:
+    build: ./nginx
+    ports:
+    - '80:80'
+    depends_on:
+    - web1
+    - web2
+
+volumes:
+  mysql_data:
+
+
